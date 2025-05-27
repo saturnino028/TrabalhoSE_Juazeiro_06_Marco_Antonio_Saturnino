@@ -90,7 +90,7 @@ uint8_t InitSistema()
         flag_led = flag_led*2;
     }
 
-    xRuidoQueue = xQueueCreate(10, sizeof(uint8_t)); //Criar fila para leituras do MIC
+    xRuidoQueue = xQueueCreate(5, sizeof(uint8_t)); //Criar fila para leituras do MIC
     xResetSem = xSemaphoreCreateBinary(); //Cria semáforo binário para indicar RESET
     xBotaoIncSem = xSemaphoreCreateBinary();             // evento do botão INC
     xBotaoDecSem = xSemaphoreCreateBinary();             // evento do botão DEC
@@ -302,8 +302,15 @@ void vTaskSilencio()
                 desenhar_fig(sessenta_a_80, brilho_matriz);
             else
             {
+                ssd1306_fill(&ssd, false); // Limpa o display
+                ssd1306_rect(&ssd, 3, 3, 122, 60, true, false); // Desenha um retângulo 
+                ssd1306_draw_string(&ssd, "Silencio", 8, 30); // Desenha uma string
+                ssd1306_send_data(&ssd);
+                campainha(volume_buzzer, 200, slice_b, buz_B);
                 desenhar_fig(oitenta_a_100, brilho_matriz);
                 campainha(volume_buzzer, 1000, slice_b, buz_B);
+                vTaskDelay(pdMS_TO_TICKS(1000));
+                AtualizarDisplay();
             }
             
             if(xSemaphoreTake(xDisplayMutex, pdMS_TO_TICKS(500)) == pdTRUE) 
